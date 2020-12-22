@@ -15,10 +15,7 @@ public:
 
 class Catalogue{
 public:
-  vector <Part *> heads;
-  vector <Part *> bodies;
-  vector <Part *> arms;
-  vector <Part *> legs;
+  vector <Part *> parts;
 
   void addPart(Part *);
   void readFile(string);
@@ -63,6 +60,7 @@ void buildMode(Character player){
   Catalogue c;
   int funds = 1000000;
 
+  player.mechs.push_back(m);
   c.readFile("parts.partlist");
 
 
@@ -72,22 +70,61 @@ void buildMode(Character player){
     if(input == "exit")
       return;
     else if(input == "print"){
-      m.printMech();
+      player.mechs[0].printMech();
     }else if(input  == "list"){
       c.printCatalogue();
     }else if(input == "buy"){
-      int i = 0;
+      int i;
 
-      //TODO: Search for specific parts by name and type.
+      cin >> input;
+      for(i = 0; i<c.parts.size(); i++){
+        if(input == c.parts[i]->name)
+          break;
+      }
 
-      cout << c.heads[i]->price << endl;
-      if(funds > c.heads[i]->price){
-        funds -= c.heads[i]->price;
-        player.partsOwned.addPart(c.heads[i]);
+      if(input == c.parts[i]->name){
+        if(funds > c.parts[i]->price){
+          funds -= c.parts[i]->price;
+          player.partsOwned.addPart(c.parts[i]);
+        }
+      }else{
+        cout << input << " not found." << endl;
       }      
+    }else if(input == "inventory"){
+      player.partsOwned.printCatalogue();
+    }else if(input == "equip"){
+      int i;
+      int mechNumber;
+
+      cin >> mechNumber;
+      if(mechNumber < player.mechs.size()){
+        cin >> input;
+        for(i=0; i<c.parts.size(); i++){
+          if(input == player.partsOwned.parts[i]->name)
+            break;        
+        }
+
+        if(input == player.partsOwned.parts[i]->name){
+          if(player.partsOwned.parts[i]->type == "Head"){
+            player.mechs[mechNumber].head = *player.partsOwned.parts[i];
+          }else if(player.partsOwned.parts[i]->type == "Body"){
+            player.mechs[mechNumber].body = *player.partsOwned.parts[i];
+          }else if(player.partsOwned.parts[i]->type == "Arms"){
+            player.mechs[mechNumber].arms = *player.partsOwned.parts[i];
+          }else if(player.partsOwned.parts[i]->type == "Legs"){
+            player.mechs[mechNumber].legs = *player.partsOwned.parts[i];
+          }
+        }else{
+          cout << "Part not owned." << endl;
+        }
+      }else{
+        cout << "You don't have that many mechs." << endl;
+      }
     }else{
-      cout << "Hi " << input << endl;
+      cout << "Invalid command: \"" << input << "\" maybe you've capitalized something?" << endl;
     }
+
+    cout << endl;
   }  
 }
 
@@ -109,40 +146,21 @@ void Catalogue::readFile(string fileName){
   partsFile.open(fileName);
   
   while(!partsFile.eof()){
-
-    //Read in a part
+    //Read in a part and place it in the list
     p = new Part;
     partsFile >> p->type >> p->name >> p->durability >> p->price;
-
-    //Place it in the correct section
-    if(p->type == "Head")
-      heads.push_back(p);
-    else if(p->type == "Body")
-      bodies.push_back(p);
-    else if(p->type == "Legs")
-      legs.push_back(p);
-    else if(p->type == "Arms")
-      arms.push_back(p);
+    parts.push_back(p);
   }
 }
 
 void Catalogue::printCatalogue(){
-  cout << "Heads" << endl;
-  for(int i = 0; i<heads.size(); i++){
-    cout << heads[i]->name << " " << heads[i]->price << endl;
+  cout << "Listing Current Catalogue" << endl;
+  for(int i = 0; i<parts.size(); i++){
+    cout << parts[i]->name << " " << parts[i]->price << endl;
   }
   cout << endl;
 }
 
 void Catalogue::addPart(Part *part){
-    if(part->type == "Head")
-      heads.push_back(part);
-    else if(part->type == "Body")
-      bodies.push_back(part);
-    else if(part->type == "Arms")
-      arms.push_back(part);
-    else if(part->type == "Legs")
-      legs.push_back(part);
-    else
-      cout << "Part " << part->name << " is invalid" << endl;
+  parts.push_back(part);
 }
