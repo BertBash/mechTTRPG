@@ -20,7 +20,9 @@ public:
   vector <Part *> arms;
   vector <Part *> legs;
 
+  void addPart(Part *);
   void readFile(string);
+  void printCatalogue();
 };
 
 class Mech{
@@ -34,26 +36,36 @@ public:
   void printMech();
 };
 
-void buildMode(Mech, Catalogue);
+class Character{
+public:
+  Catalogue partsOwned;
+  vector <Mech> mechs;  
+};
+
+
+void buildMode(Character);
 
 int main(){
   Catalogue mainCat;
+  Character player;
   Mech m;
   
-  mainCat.readFile("parts.partlist");
-
-  buildMode(m, mainCat);
+  buildMode(player);
   
   return 0;
 }
 
-
-//TODO: Add the ability to change parts
-void buildMode(Mech m, Catalogue c){
+//Core building function dictates mech creation
+void buildMode(Character player){
   bool building = true;
   string input;
+  Mech m;
+  Catalogue c;
   int funds = 1000000;
-  
+
+  c.readFile("parts.partlist");
+
+
   while(building){
     cout << "Current Funds: $" << funds << endl;
     cin >> input;
@@ -61,8 +73,21 @@ void buildMode(Mech m, Catalogue c){
       return;
     else if(input == "print"){
       m.printMech();
-    }else if
+    }else if(input  == "list"){
+      c.printCatalogue();
+    }else if(input == "buy"){
+      int i = 0;
+
+      //TODO: Search for specific parts by name and type.
+
+      cout << c.heads[i]->price << endl;
+      if(funds > c.heads[i]->price){
+        funds -= c.heads[i]->price;
+        player.partsOwned.addPart(c.heads[i]);
+      }      
+    }else{
       cout << "Hi " << input << endl;
+    }
   }  
 }
 
@@ -99,4 +124,25 @@ void Catalogue::readFile(string fileName){
     else if(p->type == "Arms")
       arms.push_back(p);
   }
+}
+
+void Catalogue::printCatalogue(){
+  cout << "Heads" << endl;
+  for(int i = 0; i<heads.size(); i++){
+    cout << heads[i]->name << " " << heads[i]->price << endl;
+  }
+  cout << endl;
+}
+
+void Catalogue::addPart(Part *part){
+    if(part->type == "Head")
+      heads.push_back(part);
+    else if(part->type == "Body")
+      bodies.push_back(part);
+    else if(part->type == "Arms")
+      arms.push_back(part);
+    else if(part->type == "Legs")
+      legs.push_back(part);
+    else
+      cout << "Part " << part->name << " is invalid" << endl;
 }
